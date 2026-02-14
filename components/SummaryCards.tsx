@@ -8,6 +8,11 @@ export default function SummaryCards({ positions }: SummaryCardsProps) {
   const totalValue = positions.reduce((sum, pos) => sum + pos.marketValue, 0);
   const numPositions = positions.length;
 
+  // Return early if no positions to avoid errors
+  if (positions.length === 0) {
+    return null;
+  }
+
   const topGainer = positions.reduce((max, pos) =>
     pos.changePercent > max.changePercent ? pos : max
   , positions[0]);

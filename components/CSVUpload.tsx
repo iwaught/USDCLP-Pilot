@@ -10,8 +10,14 @@ export default function CSVUpload({ onFileUpload }: CSVUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const isValidFileType = (file: File): boolean => {
+    const validTypes = ['text/plain', 'text/csv', 'text/tab-separated-values'];
+    const validExtensions = ['.tsv', '.csv'];
+    return validTypes.includes(file.type) || validExtensions.some(ext => file.name.endsWith(ext));
+  };
+
   const handleFile = (file: File) => {
-    if (file.type !== 'text/plain' && file.type !== 'text/csv' && file.type !== 'text/tab-separated-values' && !file.name.endsWith('.tsv') && !file.name.endsWith('.csv')) {
+    if (!isValidFileType(file)) {
       alert('Please upload a CSV or TSV file');
       return;
     }

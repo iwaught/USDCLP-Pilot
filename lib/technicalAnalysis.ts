@@ -1,5 +1,8 @@
 import { TechnicalIndicators, TradeSignal } from './types';
 
+// Default fallback rate when insufficient data is available
+const DEFAULT_FALLBACK_RATE = 850;
+
 /**
  * Calculate RSI (Relative Strength Index) - 14 period default
  */
@@ -102,7 +105,7 @@ export function calculateMACD(prices: number[]): { macd: number; signal: number;
  */
 export function calculateSupportResistance(prices: number[]): { support: number; resistance: number } {
   if (prices.length < 20) {
-    const currentPrice = prices[prices.length - 1] || 850;
+    const currentPrice = prices[prices.length - 1] || DEFAULT_FALLBACK_RATE;
     return {
       support: currentPrice * 0.98,
       resistance: currentPrice * 1.02,

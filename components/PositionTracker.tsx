@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { Position } from '@/lib/types';
 import { formatNumber, formatUSD, formatCLP } from '@/lib/formatters';
 
+// Standard forex lot size in units of base currency (USD)
+const STANDARD_LOT_SIZE = 100000;
+
 interface PositionTrackerProps {
   currentRate: number;
 }
@@ -74,7 +77,7 @@ export default function PositionTracker({ currentRate }: PositionTrackerProps) {
 
   const calculatePnL = (position: Position) => {
     const exitPrice = position.closePrice || currentRate;
-    const lotValueUSD = position.lotSize * 100000; // Standard lot is 100,000 units
+    const lotValueUSD = position.lotSize * STANDARD_LOT_SIZE; // Standard lot is 100,000 units
     
     // For USD/CLP, 1 lot = 100,000 USD
     // P&L in CLP = (exit rate - entry rate) * lot value in USD

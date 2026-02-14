@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { ForexRate, HistoricalRate } from '@/lib/types';
 
+// Cache durations in seconds
+const CURRENT_RATE_CACHE_SECONDS = 300; // 5 minutes - for active trading
+const HISTORICAL_RATE_CACHE_SECONDS = 3600; // 1 hour - historical data changes less frequently
+
 // Mock fallback data
 const MOCK_RATE = 860.00;
 const MOCK_CHANGE = -2.50;
@@ -12,7 +16,7 @@ async function fetchCurrentRate(): Promise<ForexRate | null> {
   try {
     // Try ExchangeRate-API first
     const response = await fetch('https://open.er-api.com/v6/latest/USD', {
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      next: { revalidate: CURRENT_RATE_CACHE_SECONDS },
     });
 
     if (!response.ok) throw new Error('ExchangeRate-API failed');
@@ -38,7 +42,7 @@ async function fetchCurrentRate(): Promise<ForexRate | null> {
     try {
       // Fallback to frankfurter.app
       const response = await fetch('https://api.frankfurter.app/latest?from=USD&to=CLP', {
-        next: { revalidate: 3600 },
+        next: { revalidate: CURRENT_RATE_CACHE_SECONDS },
       });
 
       if (!response.ok) throw new Error('Frankfurter API failed');
@@ -79,7 +83,7 @@ async function fetchHistoricalRates(): Promise<HistoricalRate[]> {
 
     const url = `https://api.frankfurter.app/${startStr}..${endStr}?from=USD&to=CLP`;
     const response = await fetch(url, {
-      next: { revalidate: 86400 }, // Cache for 24 hours
+      next: { revalidate: HISTORICAL_RATE_CACHE_SECONDS }, // Cache for 1 hour
     });
 
     if (!response.ok) throw new Error('Historical data fetch failed');

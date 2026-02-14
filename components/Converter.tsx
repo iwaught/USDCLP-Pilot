@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { formatNumber } from '@/lib/formatters';
 
 interface ConverterProps {
@@ -8,36 +8,40 @@ interface ConverterProps {
 }
 
 export default function Converter({ rate }: ConverterProps) {
-  const [usdAmount, setUsdAmount] = useState<string>('1000');
-  const [clpAmount, setClpAmount] = useState<string>('');
-  const [lastUpdated, setLastUpdated] = useState<'usd' | 'clp'>('usd');
+  const [usdInput, setUsdInput] = useState<string>('1000');
+  const [clpInput, setClpInput] = useState<string>('');
+  const [editingField, setEditingField] = useState<'usd' | 'clp' | null>(null);
+
+  // Calculate displayed values based on which field is being edited
+  const displayedUsd = useMemo(() => {
+    if (editingField === 'clp' && clpInput) {
+      const clp = parseFloat(clpInput.replace(/,/g, '')) || 0;
+      return formatNumber(clp / rate, 2);
+    }
+    return usdInput;
+  }, [editingField, clpInput, rate, usdInput]);
+
+  const displayedClp = useMemo(() => {
+    if (editingField === 'usd' && usdInput) {
+      const usd = parseFloat(usdInput) || 0;
+      return formatNumber(usd * rate, 2);
+    } else if (editingField === 'clp') {
+      return clpInput;
+    }
+    // Default: calculate from USD
+    const usd = parseFloat(usdInput) || 0;
+    return formatNumber(usd * rate, 2);
+  }, [editingField, usdInput, clpInput, rate]);
 
   const handleUsdChange = (value: string) => {
-    setUsdAmount(value);
-    const usd = parseFloat(value) || 0;
-    setClpAmount(formatNumber(usd * rate, 2));
-    setLastUpdated('usd');
+    setUsdInput(value);
+    setEditingField('usd');
   };
 
   const handleClpChange = (value: string) => {
-    setClpAmount(value);
-    const clp = parseFloat(value.replace(/,/g, '')) || 0;
-    setUsdAmount(formatNumber(clp / rate, 2));
-    setLastUpdated('clp');
+    setClpInput(value);
+    setEditingField('clp');
   };
-
-  // Update calculated values when rate changes
-  if (lastUpdated === 'usd' && usdAmount) {
-    const calculatedClp = formatNumber(parseFloat(usdAmount) * rate, 2);
-    if (calculatedClp !== clpAmount) {
-      setTimeout(() => setClpAmount(calculatedClp), 0);
-    }
-  } else if (lastUpdated === 'clp' && clpAmount) {
-    const calculatedUsd = formatNumber(parseFloat(clpAmount.replace(/,/g, '')) / rate, 2);
-    if (calculatedUsd !== usdAmount) {
-      setTimeout(() => setUsdAmount(calculatedUsd), 0);
-    }
-  }
 
   const lotSize = 0.1;
   const lotUSD = 10000;
@@ -55,7 +59,7 @@ export default function Converter({ rate }: ConverterProps) {
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
             <input
               type="text"
-              value={usdAmount}
+              value={displayedUsd}
               onChange={(e) => handleUsdChange(e.target.value)}
               className="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg pl-8 pr-4 py-3 text-white focus:outline-none focus:border-[#3a3a3a]"
               placeholder="0.00"
@@ -75,7 +79,7 @@ export default function Converter({ rate }: ConverterProps) {
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
             <input
               type="text"
-              value={clpAmount}
+              value={displayedClp}
               onChange={(e) => handleClpChange(e.target.value)}
               className="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg pl-8 pr-4 py-3 text-white focus:outline-none focus:border-[#3a3a3a]"
               placeholder="0.00"

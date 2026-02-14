@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import RateCard from '@/components/RateCard';
 import Converter from '@/components/Converter';
 import TechnicalPanel from '@/components/TechnicalPanel';
@@ -48,19 +48,23 @@ export default function Home() {
     fetchData();
   }, []);
 
-  // Calculate SMA arrays for chart
-  const sma20Data: number[] = [];
-  const sma50Data: number[] = [];
+  // Memoized SMA arrays for chart - calculated incrementally
+  const { sma20Data, sma50Data } = useMemo(() => {
+    const sma20: number[] = [];
+    const sma50: number[] = [];
 
-  if (historicalRates.length > 0) {
-    const prices = historicalRates.map((h) => h.rate);
-    
-    for (let i = 0; i < prices.length; i++) {
-      const slice = prices.slice(0, i + 1);
-      sma20Data.push(calculateSMA(slice, 20));
-      sma50Data.push(calculateSMA(slice, 50));
+    if (historicalRates.length > 0) {
+      const prices = historicalRates.map((h) => h.rate);
+      
+      for (let i = 0; i < prices.length; i++) {
+        const slice = prices.slice(0, i + 1);
+        sma20.push(calculateSMA(slice, 20));
+        sma50.push(calculateSMA(slice, 50));
+      }
     }
-  }
+
+    return { sma20Data: sma20, sma50Data: sma50 };
+  }, [historicalRates]);
 
   if (loading) {
     return (

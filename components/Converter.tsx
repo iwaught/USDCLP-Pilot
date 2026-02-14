@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { formatNumber } from '@/lib/formatters';
 
 interface ConverterProps {
@@ -10,26 +10,34 @@ interface ConverterProps {
 export default function Converter({ rate }: ConverterProps) {
   const [usdAmount, setUsdAmount] = useState<string>('1000');
   const [clpAmount, setClpAmount] = useState<string>('');
-
-  useEffect(() => {
-    // Update CLP when rate changes
-    if (usdAmount) {
-      const usd = parseFloat(usdAmount) || 0;
-      setClpAmount(formatNumber(usd * rate, 2));
-    }
-  }, [rate, usdAmount]);
+  const [lastUpdated, setLastUpdated] = useState<'usd' | 'clp'>('usd');
 
   const handleUsdChange = (value: string) => {
     setUsdAmount(value);
     const usd = parseFloat(value) || 0;
     setClpAmount(formatNumber(usd * rate, 2));
+    setLastUpdated('usd');
   };
 
   const handleClpChange = (value: string) => {
     setClpAmount(value);
     const clp = parseFloat(value.replace(/,/g, '')) || 0;
     setUsdAmount(formatNumber(clp / rate, 2));
+    setLastUpdated('clp');
   };
+
+  // Update calculated values when rate changes
+  if (lastUpdated === 'usd' && usdAmount) {
+    const calculatedClp = formatNumber(parseFloat(usdAmount) * rate, 2);
+    if (calculatedClp !== clpAmount) {
+      setTimeout(() => setClpAmount(calculatedClp), 0);
+    }
+  } else if (lastUpdated === 'clp' && clpAmount) {
+    const calculatedUsd = formatNumber(parseFloat(clpAmount.replace(/,/g, '')) / rate, 2);
+    if (calculatedUsd !== usdAmount) {
+      setTimeout(() => setUsdAmount(calculatedUsd), 0);
+    }
+  }
 
   const lotSize = 0.1;
   const lotUSD = 10000;

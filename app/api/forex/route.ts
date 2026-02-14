@@ -89,7 +89,7 @@ async function fetchHistoricalRates(): Promise<HistoricalRate[]> {
 
     if (data.rates) {
       for (const [date, rateData] of Object.entries(data.rates)) {
-        const clpRate = (rateData as any).CLP;
+        const clpRate = (rateData as { CLP?: number }).CLP;
         if (clpRate) {
           rates.push({
             date,

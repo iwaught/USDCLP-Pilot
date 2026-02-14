@@ -9,6 +9,49 @@ interface PriceChartProps {
   sma50Data: number[];
 }
 
+// Custom tooltip component (defined outside)
+interface TooltipPayload {
+  value?: number;
+  payload: {
+    date: string;
+  };
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayload[];
+}
+
+function CustomTooltip({ active, payload }: CustomTooltipProps) {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-3">
+        <p className="text-zinc-400 text-xs mb-1">
+          {new Date(payload[0].payload.date).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })}
+        </p>
+        <p className="text-white font-semibold">
+          Rate: {payload[0].value?.toFixed(2)} CLP
+        </p>
+        {payload[1]?.value && (
+          <p className="text-blue-400 text-sm">
+            SMA20: {payload[1].value.toFixed(2)}
+          </p>
+        )}
+        {payload[2]?.value && (
+          <p className="text-purple-400 text-sm">
+            SMA50: {payload[2].value.toFixed(2)}
+          </p>
+        )}
+      </div>
+    );
+  }
+  return null;
+}
+
 export default function PriceChart({ data, sma20Data, sma50Data }: PriceChartProps) {
   // Combine data for chart
   const chartData = data.map((item, index) => ({
@@ -22,37 +65,6 @@ export default function PriceChart({ data, sma20Data, sma50Data }: PriceChartPro
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
-
-  // Custom tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-3">
-          <p className="text-zinc-400 text-xs mb-1">
-            {new Date(payload[0].payload.date).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </p>
-          <p className="text-white font-semibold">
-            Rate: {payload[0].value?.toFixed(2)} CLP
-          </p>
-          {payload[1]?.value && (
-            <p className="text-blue-400 text-sm">
-              SMA20: {payload[1].value.toFixed(2)}
-            </p>
-          )}
-          {payload[2]?.value && (
-            <p className="text-purple-400 text-sm">
-              SMA50: {payload[2].value.toFixed(2)}
-            </p>
-          )}
-        </div>
-      );
-    }
-    return null;
   };
 
   return (

@@ -2,14 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import { Position } from '@/lib/types';
-import { formatNumber, formatUSD, formatCLP, formatDate } from '@/lib/formatters';
+import { formatNumber, formatUSD, formatCLP } from '@/lib/formatters';
 
 interface PositionTrackerProps {
   currentRate: number;
 }
 
 export default function PositionTracker({ currentRate }: PositionTrackerProps) {
-  const [positions, setPositions] = useState<Position[]>([]);
+  // Load positions from localStorage with lazy initialization
+  const [positions, setPositions] = useState<Position[]>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('usdclp-positions');
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (e) {
+          console.error('Failed to load positions:', e);
+        }
+      }
+    }
+    return [];
+  });
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     direction: 'buy' as 'buy' | 'sell',
@@ -17,22 +30,12 @@ export default function PositionTracker({ currentRate }: PositionTrackerProps) {
     lotSize: '0.1',
   });
 
-  // Load positions from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem('usdclp-positions');
-    if (stored) {
-      try {
-        setPositions(JSON.parse(stored));
-      } catch (e) {
-        console.error('Failed to load positions:', e);
-      }
-    }
-  }, []);
-
-  // Save positions to localStorage
+  // Save positions to localStorage whenever they change
   useEffect(() => {
     if (positions.length > 0) {
       localStorage.setItem('usdclp-positions', JSON.stringify(positions));
+    } else {
+      localStorage.removeItem('usdclp-positions');
     }
   }, [positions]);
 
@@ -66,11 +69,7 @@ export default function PositionTracker({ currentRate }: PositionTrackerProps) {
   };
 
   const handleDeletePosition = (id: string) => {
-    const updatedPositions = positions.filter((pos) => pos.id !== id);
-    setPositions(updatedPositions);
-    if (updatedPositions.length === 0) {
-      localStorage.removeItem('usdclp-positions');
-    }
+    setPositions(positions.filter((pos) => pos.id !== id));
   };
 
   const calculatePnL = (position: Position) => {

@@ -7,6 +7,31 @@ interface PositionsTableProps {
   positions: Position[];
 }
 
+interface SortIconProps {
+  field: SortField;
+  sortField: SortField;
+  sortDirection: SortDirection;
+}
+
+function SortIcon({ field, sortField, sortDirection }: SortIconProps) {
+  if (sortField !== field) {
+    return (
+      <svg className="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+      </svg>
+    );
+  }
+  return sortDirection === 'asc' ? (
+    <svg className="w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+    </svg>
+  ) : (
+    <svg className="w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  );
+}
+
 export default function PositionsTable({ positions }: PositionsTableProps) {
   const [sortField, setSortField] = useState<SortField>('marketValue');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -48,25 +73,6 @@ export default function PositionsTable({ positions }: PositionsTableProps) {
       : (bValue as number) - (aValue as number);
   });
 
-  const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) {
-      return (
-        <svg className="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-        </svg>
-      );
-    }
-    return sortDirection === 'asc' ? (
-      <svg className="w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-      </svg>
-    ) : (
-      <svg className="w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      </svg>
-    );
-  };
-
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
@@ -79,7 +85,7 @@ export default function PositionsTable({ positions }: PositionsTableProps) {
               >
                 <div className="flex items-center gap-2">
                   Symbol
-                  <SortIcon field="symbol" />
+                  <SortIcon field="symbol" sortField={sortField} sortDirection={sortDirection} />
                 </div>
               </th>
               <th
@@ -88,7 +94,7 @@ export default function PositionsTable({ positions }: PositionsTableProps) {
               >
                 <div className="flex items-center justify-end gap-2">
                   Price
-                  <SortIcon field="price" />
+                  <SortIcon field="price" sortField={sortField} sortDirection={sortDirection} />
                 </div>
               </th>
               <th
@@ -97,7 +103,7 @@ export default function PositionsTable({ positions }: PositionsTableProps) {
               >
                 <div className="flex items-center justify-end gap-2">
                   Change
-                  <SortIcon field="change" />
+                  <SortIcon field="change" sortField={sortField} sortDirection={sortDirection} />
                 </div>
               </th>
               <th
@@ -106,7 +112,7 @@ export default function PositionsTable({ positions }: PositionsTableProps) {
               >
                 <div className="flex items-center justify-end gap-2">
                   Change %
-                  <SortIcon field="changePercent" />
+                  <SortIcon field="changePercent" sortField={sortField} sortDirection={sortDirection} />
                 </div>
               </th>
               <th
@@ -115,7 +121,7 @@ export default function PositionsTable({ positions }: PositionsTableProps) {
               >
                 <div className="flex items-center justify-end gap-2">
                   Shares
-                  <SortIcon field="shares" />
+                  <SortIcon field="shares" sortField={sortField} sortDirection={sortDirection} />
                 </div>
               </th>
               <th
@@ -124,7 +130,7 @@ export default function PositionsTable({ positions }: PositionsTableProps) {
               >
                 <div className="flex items-center justify-end gap-2">
                   Market Value
-                  <SortIcon field="marketValue" />
+                  <SortIcon field="marketValue" sortField={sortField} sortDirection={sortDirection} />
                 </div>
               </th>
             </tr>
